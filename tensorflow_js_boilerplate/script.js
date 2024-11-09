@@ -21,11 +21,39 @@ if (status) {
 
 
 const MODEL_PATH = 'https://storage.googleapis.com/jmstore/TensorFlowJS/EdX/SavedModels/sqftToPropertyPrice/model.json'
+const local_path = 'localstorage://demo'
 let model = undefined
 
 async function loadModel() {
-    model = await tf.loadLayersModel(MODEL_PATH)
+
+    const local_path_list = await tf.io.listModels()
+    if (local_path_list[local_path]) {
+      model = await tf.loadLayersModel(local_path)
+      console.log('从本地获取模型')
+    } else {
+      model = await tf.loadLayersModel(MODEL_PATH)
+      console.log('从云端获取模型')
+    }
+
     model.summary()
+
+    // 将模型存储到本地
+    await model.save(local_path)
+
+    const input = tf.tensor2d([[870]])
+    const inputBatch = tf.tensor2d([[500], [1100], [970]])
+
+    const result = model.predict(input)
+    const resultBatch = model.predict(inputBatch)
+
+    result.print()
+    resultBatch.print()
+
+    input.dispose()
+    inputBatch.dispose()
+    result.dispose()
+    resultBatch.dispose()
+    model.dispose()
 }
 loadModel()
 
