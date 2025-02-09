@@ -27,6 +27,7 @@ let model = undefined
 async function loadModel() {
 
     const local_path_list = await tf.io.listModels()
+    console.log(local_path_list)
     if (local_path_list[local_path]) {
       model = await tf.loadLayersModel(local_path)
       console.log('从本地获取模型')
@@ -35,6 +36,20 @@ async function loadModel() {
       console.log('从云端获取模型')
     }
 
+    /**
+     * 查看模型信息
+     * _________________________________________________________________
+     * Layer (type)                 Output shape              Param #   
+     * =================================================================
+     * dense_input (InputLayer)     [null,1]                  0         
+     * _________________________________________________________________
+     * dense (Dense)                [null,1]                  2         
+     * =================================================================
+     * Total params: 2
+     * Trainable params: 2
+     * Non-trainable params: 0
+     * _________________________________________________________________
+     */
     model.summary()
 
     // 将模型存储到本地
