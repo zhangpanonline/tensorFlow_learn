@@ -3,12 +3,13 @@ const MODEL_PATH = 'https://tfhub.dev/google/tfjs-model/movenet/singlepose/light
 const video = document.getElementById('webcam');
 const liveView = document.getElementById('liveView');
 let person = null;
+const dotList = []
+const vSize = 480
 
-async function predictWebcam(model) {
+async function predictWebcam(model, movenet) {
   const videoTensor = tf.browser.fromPixels(video)
 
-  // Now let's start classifying a frame in the stream.
-  const predictions = await model.detect(video)
+  const predictions = await model.detect(videoTensor)
   try {
     if (person) {
       liveView.removeChild(person)
@@ -31,20 +32,38 @@ async function predictWebcam(model) {
   for (let n = 0; n < predictions.length; n++) {
     // If we are over 66% sure we are sure we classified it right, draw it!
     if (predictions[n].score > 0.66 && predictions[n].class === 'person') {
-      person = document.createElement('div');
-      person.setAttribute('class', 'highlighter');
-      person.style = 'left: ' + predictions[n].bbox[0] + 'px; top: '
-          + predictions[n].bbox[1] + 'px; width: ' 
-          + predictions[n].bbox[2] + 'px; height: '
-          + predictions[n].bbox[3] + 'px;';
+      // person = document.createElement('div');
+      // person.setAttribute('class', 'highlighter');
 
-      liveView.appendChild(person);
+      // const x = predictions[n].bbox[0]
+      // const y = predictions[n].bbox[1]
+      // const width = predictions[n].bbox[2]
+      // const height = predictions[n].bbox[3]
+      // person.style = `left: ${x}px; top: ${y}px; width: ${width}px; height: ${height}px;`;
+
+      // liveView.appendChild(person);
+
+      const resizedTensor = tf.image.resizeBilinear(videoTensor, [192, 192], true).toInt();
+      const tensorOutput = await movenet.predict(tf.expandDims(resizedTensor))
+      resizedTensor.dispose()
+      const result = await tensorOutput.array()
+      tensorOutput.dispose()
+      const list = result.flat(2).map(([y, x, score]) => ([y * vSize, x * vSize, score]))
+      dotList.forEach(el => liveView.removeChild(el))
+      dotList.length = 0
+      list.forEach(([y, x, score]) => {
+        if (score < 0.6) return false
+        const dot = document.createElement('div')
+        dot.setAttribute('class', 'dot')
+        dot.style = `left: ${x - 5}px; top: ${y - 5}px`
+        liveView.appendChild(dot)
+        dotList.push(dot)
+      })
 
     }
   }
-  
-  // Call this function again to keep predicting when the browser is ready.
-  window.requestAnimationFrame(predictWebcam.bind(this, model));
+  videoTensor.dispose()
+  window.requestAnimationFrame(predictWebcam.bind(this, model, movenet));
 }
 
 loadModel()
@@ -54,16 +73,16 @@ async function loadModel() {
   if (!!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)) {
     const constraints = {
       video: true,
-      // video: {
-      //   width: { ideal: 1280 },
-      //   height: { ideal: 720 }
-      // }
+      video: {
+        width: { ideal: vSize },
+        height: { ideal: vSize }
+      }
     };
   
     // Activate the webcam stream.
     const stream = await navigator.mediaDevices.getUserMedia(constraints)
     video.srcObject = stream;
-    video.addEventListener('loadeddata', predictWebcam.bind(this, model));
+    video.addEventListener('loadeddata', predictWebcam.bind(this, model, movenet));
 
   } else {
     alert('getUserMedia() is not supported by your browser')
