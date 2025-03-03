@@ -1,0 +1,6 @@
+# pnpm 工作区配置文件
+packages:
+  # 包含所有子目录下的包
+  - 'apps/**'
+  # 排除测试目录下的包
+  - '!packages/**/__tests__'
