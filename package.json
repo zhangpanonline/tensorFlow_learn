@@ -1,5 +1,5 @@
 {
-  "name": "tensorFlow_learn",
+  "name": "tensorflow-learn",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -8,5 +8,11 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "@tensorflow/tfjs": "^4.22.0"
+  },
+  "devDependencies": {
+    "vite": "^6.2.0"
+  }
 }
