@@ -7,3 +7,4 @@ tf.util.shuffleCombo(INPUTS, OUTPUTS)
 
 const INPUTS_TENSOR = tf.tensor2d(INPUTS)
 const OUTPUTS_TENSOR = tf.tensor1d(OUTPUTS)
+

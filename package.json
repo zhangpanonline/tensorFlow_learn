@@ -10,7 +10,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@tensorflow/tfjs": "^4.22.0"
+    "@tensorflow/tfjs": "^4.22.0",
+    "d3": "^7.9.0",
+    "dom-to-image": "^2.6.0",
+    "gl-matrix": "^3.4.3"
   },
   "devDependencies": {
     "vite": "^6.2.0"
