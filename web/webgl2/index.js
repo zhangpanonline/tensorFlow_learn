@@ -1,0 +1,1 @@
+import './index_1_2.2'
